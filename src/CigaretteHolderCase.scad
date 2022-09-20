@@ -23,8 +23,11 @@ lBox = lHolder + lPerimeter;
 wBox = dTipAdapter + dHolder + 2 * lPerimeter;
 hBox = dTipAdapter + lPerimeter;
 hHook = hBox / 2;
-
 dAngle = dAngleScrewHead + 0.2 + 2 * lWall;
+yFrontPos = dHolder / 2 + lWall + lSpacing;
+yMouthPos = yFrontPos + lWall + 2 * lSpacing + dHolder;
+xAdapterPos = lBox - lPerimeter / 2 - lTipAdapter;
+yAdapterPos = yMouthPos + lPerimeter / 2;
 
 module hook() {
     difference() {
@@ -122,10 +125,6 @@ module roundedEdgeMask(size = [1, 1, 1], edgeRadius = 1) {
 }
 
 module halfCover(yPos) {
-    yFrontPos = dHolder / 2 + lWall + lSpacing;
-    yMouthPos = yFrontPos + lWall + 2 * lSpacing + dHolder;
-    xAdapterPos = lBox - lPerimeter / 2 - lTipAdapter;
-    yAdapterPos = yMouthPos + lPerimeter / 2;
     boxSize = [lBox, wBox, hBox / 2];
     translate([0, yPos, 0])
         difference() {
@@ -152,23 +151,30 @@ angleScrewHeadHole(lBox - 25, false);
 translate([(lBox - lHook) / 2, dAngle / 2 + wBox - wHook, hBox / 2])
     hook();
 
-
+yOffset = 1;
 difference() {
     mirror([0, 1, 0])
-        translate([0, 1, 0])
+        translate([0, yOffset, 0])
             {
                 halfCover(coverPos);
                 angleNut(25 + lSpacing + lAngle, false);
                 angleNut(lBox - 25 - lSpacing - lAngle);
             }
-    translate([(lBox - lHook) / 2 - lSpacing, - dAngle / 2 - wBox - 1 - cadFix, - hBox * 1 / 4])
+    translate([(lBox - lHook) / 2 - lSpacing, - dAngle / 2 - wBox - yOffset - cadFix, - hBox * 1 / 4])
         cube([lHook + 2 * lSpacing, wHook / 2 + lSpacing, hBox]);
-    translate([(lBox - lHook) / 2 - lSpacing, - dAngle / 2 - wBox - 1 - cadFix, - cadFix])
+    translate([(lBox - lHook) / 2 - lSpacing, - dAngle / 2 - wBox - yOffset - cadFix, - cadFix])
         cube([lHook + 2 * lSpacing, wHook + lSpacing, hBox / 4]);
 }
 if (renderMode == SHOW_CIGARETTE_HOLDER) {
-    //Todo
-    //color("purple", 0.3)
-    //    translate([lPerimeter / 2, (wBox + dAngle) / 2, hBox / 2])
-    //        syringe(0.5);
+    color("purple", 0.3) {
+        translate([lPerimeter / 2 + lSpacing, -yMouthPos - coverPos - yOffset - lSpacing, hBox / 2 + lSpacing])
+            rotate([0,90,0])
+                MouthPipe();
+        translate([lPerimeter / 2 + lSpacing, -yFrontPos - coverPos - yOffset - lSpacing, hBox / 2 + lSpacing])
+            rotate([0,90,0])
+                FrontPipe();
+        translate([xAdapterPos + lSpacing, -yAdapterPos - coverPos - yOffset - lSpacing, hBox / 2 + lSpacing])
+            rotate([0,90,0])
+                TipAdapter();
+    }
 }
