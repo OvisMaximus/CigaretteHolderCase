@@ -70,15 +70,69 @@ module angleScrewHeadHole(xPos = 0, isTop = true) {
     translate([0, 0, zPos])
         cylinder(lAngleScrewHead + cadFix, d = dAngleNut + lSpacing);
 }
+module roundedEdgeMask(size = [1, 1, 1], edgeRadius = 1) {
+    edgeDiameter = 2 * edgeRadius;
+    boundingBoxSize = [size.x + 2, size.y + 2, size.z + 1 + cadFix];
+    coreBoxSize = [size.x - edgeDiameter, size.y - edgeDiameter, size.z - edgeRadius + 2 * cadFix];
+    cornerPositions = [
+            [edgeRadius, edgeRadius, edgeRadius],
+            [edgeRadius, size.y - edgeRadius, edgeRadius],
+            [size.x - edgeRadius, edgeRadius, edgeRadius],
+            [size.x - edgeRadius, size.y - edgeRadius, edgeRadius]];
+    module freeSpaceWithoutChamfers() {
+        translate([edgeRadius, edgeRadius, 0]) cube(coreBoxSize);
+        for (xOfs = [0: edgeDiameter]) {
+            translate([xOfs, edgeRadius, edgeRadius]) cube(coreBoxSize);
+        }
+        for (yOfs = [0: edgeDiameter]) {
+            translate([edgeRadius, yOfs, edgeRadius]) cube(coreBoxSize);
+        }
+    }
+    module verticalChamfers() {
+        for (pos = cornerPositions)
+        translate(pos)
+            cylinder(size.z + 2 * cadFix, r = edgeRadius);
+    }
+    module horizontalChamfersX() {
+        for (pos = [
+                [edgeRadius, edgeRadius, edgeRadius],
+                [edgeRadius, size.y - edgeRadius, edgeRadius]])
+        translate(pos)
+            rotate([0, 90, 0])
+                cylinder(size.x - edgeDiameter, r = edgeRadius);
+    }
+    module horizontalChamfersY() {
+        for (pos = [
+                [edgeRadius, edgeRadius, edgeRadius],
+                [size.x - edgeRadius, edgeRadius, edgeRadius]])
+        translate(pos)
+            rotate([- 90, 0, 0])
+                cylinder(size.y - edgeDiameter, r = edgeRadius);
+    }
+    module roundCorners() {
+        for(pos = cornerPositions)
+        translate(pos)
+            sphere(edgeRadius);
+    }
+    difference() {
+        translate([- 1, - 1, - 1])cube(boundingBoxSize);
+        freeSpaceWithoutChamfers();
+        verticalChamfers();
+        horizontalChamfersX();
+        horizontalChamfersY();
+        roundCorners();
+    }
+}
 
 module halfCover(yPos) {
     yFrontPos = dHolder / 2 + lWall + lSpacing;
     yMouthPos = yFrontPos + lWall + 2 * lSpacing + dHolder;
-    xAdapterPos = lBox - lPerimeter/2 - lTipAdapter;
-    yAdapterPos = yMouthPos + lPerimeter/2;
+    xAdapterPos = lBox - lPerimeter / 2 - lTipAdapter;
+    yAdapterPos = yMouthPos + lPerimeter / 2;
+    boxSize = [lBox, wBox, hBox / 2];
     translate([0, yPos, 0])
         difference() {
-            cube([lBox, wBox, hBox / 2]);
+            cube(boxSize);
             for (x = [- 1:2:1],
                 y = [- 1:2:1],
                 z = [- 1:2:1]) {
@@ -89,6 +143,7 @@ module halfCover(yPos) {
                 translate([xAdapterPos + x * lSpacing, yAdapterPos + y * lSpacing, hBox / 2 + z * lSpacing])
                     rotate([0, 90, 0]) cylinder(lTipAdapter, d = dTipAdapter);
             }
+            roundedEdgeMask(boxSize, 2);
         }
 }
 
@@ -115,7 +170,8 @@ difference() {
         cube([lHook + 2 * lSpacing, wHook + lSpacing, hBox / 4]);
 }
 if (renderMode == SHOW_CIGARETTE_HOLDER) {
-    color("purple", 0.3)
-        translate([lPerimeter / 2, (wBox + dAngle) / 2, hBox / 2])
-            syringe(0.5);
+    //Todo
+    //color("purple", 0.3)
+    //    translate([lPerimeter / 2, (wBox + dAngle) / 2, hBox / 2])
+    //        syringe(0.5);
 }
