@@ -16,9 +16,6 @@ lAngleScrewHead = 4; // geschaetzt TODO
 lHook = 20;
 wHook = 2.2;
 
-lTipAdapter = 35;
-dTipAdapter = 10.9;
-
 module endOfParameterSeparatorNop() {};
 
 lPerimeter = 2 * (lWall + lSpacing);
@@ -141,7 +138,7 @@ module halfCover(yPos) {
                 translate([lWall + lSpacing + x * lSpacing, yMouthPos + y * lSpacing, hBox / 2 + z * lSpacing])
                     rotate([0, 90, 0]) MouthPipe();
                 translate([xAdapterPos + x * lSpacing, yAdapterPos + y * lSpacing, hBox / 2 + z * lSpacing])
-                    rotate([0, 90, 0]) cylinder(lTipAdapter, d = dTipAdapter);
+                    rotate([0, 90, 0]) TipAdapter();
             }
             roundedEdgeMask(boxSize, 2);
         }

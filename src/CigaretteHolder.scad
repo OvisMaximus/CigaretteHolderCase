@@ -8,6 +8,8 @@ hMouth = 4.6;
 lMouth = 110;
 dRing = 9.3;
 lRing = 1.7;
+lTipAdapter = 35;
+dTipAdapter = 10.9;
 
 cadFix = 0.005;
 $fn= 100;
@@ -21,4 +23,7 @@ module MouthPipe() {
         cylinder(lMouthConnector + cadFix, d=hMouth);
     translate([0,0,lMouth])
         cylinder(lRing, d = wMouth);
+}
+module TipAdapter() {
+    cylinder(lTipAdapter, d = dTipAdapter);
 }
