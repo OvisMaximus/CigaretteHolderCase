@@ -54,14 +54,17 @@ coverWithSpaceFor(
 
 
 if (renderMode == SHOW_CIGARETTE_HOLDER) {
+    yOffset = 1;
+    dAngle = dAngleScrewHead > dAngleNut? dAngleScrewHead : dAngleNut + lSpacing + lWall;
+    yCoverPos = dAngle / 2;
     color("purple", 0.3) {
-        translate([lPerimeter / 2 + lSpacing, -yMouthPos - coverPos - yOffset - lSpacing, hBox / 2 + lSpacing])
+        translate([lPerimeter / 2 + lSpacing, -yMouthPos - yCoverPos - yOffset - lSpacing, box.z / 2 + lSpacing])
             rotate([0,90,0])
                 MouthPipe();
-        translate([lPerimeter / 2 + lSpacing, -yFrontPos - coverPos - yOffset - lSpacing, hBox / 2 + lSpacing])
+        translate([lPerimeter / 2 + lSpacing, -yFrontPos - yCoverPos - yOffset - lSpacing, box.z / 2 + lSpacing])
             rotate([0,90,0])
                 FrontPipe();
-        translate([xAdapterPos + lSpacing, -yAdapterPos - coverPos - yOffset - lSpacing, hBox / 2 + lSpacing])
+        translate([xAdapterPos + lSpacing, -yAdapterPos - yCoverPos - yOffset - lSpacing, box.z / 2 + lSpacing])
             rotate([0,90,0])
                 TipAdapter();
     }
