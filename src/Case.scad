@@ -1,5 +1,4 @@
 cadFix = 0.005;
-$fn = 50;
 
 module hook(size) {
     difference() {
@@ -22,7 +21,7 @@ module hookRest(size, pos, lSpacing) {
 }
 
 module cover(
-    contentBoundingBox = [100, 30, 10],
+    contentBoundingcontentBoundingBox = [100, 30, 10],
     sizeHook = [20, 2.2, 5],
     lSpacing = 0.2,
     lAngle = 10,
@@ -39,9 +38,11 @@ module cover(
         let (n = floor(lEdge / lSegment))
             n > 4? 4 : n;
 
-    function calcSize(oneSideAddOn) =
+    function calcSize(oneSideAddOn, hookRestAddOn) =
         let (lAddOn = 2 * (oneSideAddOn))
-            [contentBoundingBox.x + lAddOn, contentBoundingBox.y + lAddOn, contentBoundingBox.z + lAddOn];
+            [contentBoundingcontentBoundingBox.x + lAddOn
+            , contentBoundingcontentBoundingBox.y + lAddOn + hookRestAddOn
+            , contentBoundingcontentBoundingBox.z + lAddOn];
 
 
     module validateArguments() {
@@ -50,8 +51,8 @@ module cover(
         assert(dAngleNut <= dAngleBore + 2 * lWall);
         assert(dAngleScrewHead <= dAngleBore + 2*lWall);
         assert(calcNumSegments(size.x - 2 * rEdge, lAngle) > 1);
-        assert(lWall > sqrt(rEdge * rEdge / 2));
-        assert(lWall > (sizeHook.y + lSpacing));
+        //assert(lWall > sqrt(rEdge * rEdge / 2));
+        //assert(lWall > (sizeHook.y + lSpacing));
         //  hlid minimal rEdge + dAngle/2
     }
 
@@ -110,14 +111,15 @@ module cover(
     }
 
     module externalShape() {
-        sizeNet = calcSize(lWall - rEdge + lSpacing);
+        dEdge = 2 * rEdge;
+        sizeNet = [size.x - dEdge, size.y -dEdge, size.z - dEdge];
         translate([rEdge,rEdge,rEdge])
             minkowski() {
                 cube(sizeNet);
                 sphere(r=rEdge);
             }
     }
-    module closedBox() {
+    module closedcontentBoundingBox() {
         difference () {
             externalShape();
             translate([lWall, lWall, lWall])
@@ -141,7 +143,7 @@ module cover(
 
         translate([0, dAngle/2 + lSpacing, 0]) {
             difference() {
-                closedBox() children();
+                closedcontentBoundingBox() children();
                 translate([- cadFix, - cadFix, hLid])
                     scale(1.1) cube(size);
             }
@@ -175,7 +177,7 @@ module cover(
             difference() {
                 translate([0, 0, size.z])
                     rotate([180, 0, 0])
-                        closedBox() children();
+                        closedcontentBoundingBox() children();
                 translate([- cadFix, cadFix - 1.1 * size.y, hBase])
                     scale(1.1) cube(size);
                 hookRest(sizeHook, posHookRest, lSpacing);
@@ -185,7 +187,7 @@ module cover(
         }
     }
 
-    size = calcSize(lWall + lSpacing);
+    size = calcSize(lWall + lSpacing, wHook - lWall);
     angleSegments = calcNumSegments(size.x - 2 * rEdge, lAngle);
     validateArguments();
 

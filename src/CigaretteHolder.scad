@@ -7,7 +7,7 @@ wMouth = 9.4;
 hMouth = 4.6;
 lMouth = 110;
 dRing = 9.3;
-lRing = 1.7;
+lRing = 6.5;
 lTipAdapter = 35;
 dTipAdapter = 10.9;
 
