@@ -4,9 +4,9 @@ include <Case.scad>
 renderMode = 1; // [0:render for print, 1: show cigarette holder]
 SHOW_CIGARETTE_HOLDER = 1;
 
-lWall = 1.2;
+lWall = 2.5;
 lSpacing = 0.3;
-lAngle = 10;
+lAngle = 12;
 rEdge = 2;
 dAngleBore = 3 + 2 * lSpacing;
 dAngleNut = 6.1;
@@ -14,7 +14,7 @@ lAngleNut = 4; // geschaetzt TODO
 dAngleScrewHead = 5.5;
 lAngleScrewHead = 4; // geschaetzt TODO
 lHook = 20;
-wHook = 2.2;
+wHook = 2.1;
 
 module endOfParameterSeparatorNop() {};
 
@@ -31,7 +31,9 @@ yMouthPos = yFrontPos + lWall + 2 * lSpacing + dHolder;
 xAdapterPos = box.x - lPerimeter / 2 - lTipAdapter;
 yAdapterPos = yMouthPos + 2 * lSpacing;
 
-coverWithSpaceFor(
+cover(
+    box,
+    [lHook, wHook, box.z / 2],
     lSpacing,
     lAngle,
     dAngleBore,
@@ -40,9 +42,7 @@ coverWithSpaceFor(
     dAngleScrewHead,
     lAngleScrewHead,
     lWall,
-    rEdge,
-    box,
-    [lHook, wHook, box.z / 2]
+    rEdge
 ) {
     translate([lWall + lSpacing, yFrontPos + lSpacing, box.z / 2 + lSpacing])
         rotate([0, 90, 0]) FrontPipe();
