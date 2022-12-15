@@ -48,7 +48,6 @@ module cover(
     module validateArguments() {
         assert(lAngle >= lAngleScrewHead + lWall);
         assert(lAngle >= lAngleNut + lWall);
-        assert(dAngleNut <= dAngleBore + 2 * lWall);
         assert(dAngleScrewHead <= dAngleBore + 2*lWall);
         assert(calcNumSegments(size.x - 2 * rEdge, lAngle) > 1);
         //assert(lWall > sqrt(rEdge * rEdge / 2));
@@ -191,7 +190,7 @@ module cover(
     angleSegments = calcNumSegments(size.x - 2 * rEdge, lAngle);
     validateArguments();
 
-    dAngle = dAngleScrewHead > dAngleNut? dAngleScrewHead : dAngleNut + lSpacing + lWall;
+    dAngle = max(dAngleScrewHead, dAngleNut) + 2 * (lSpacing + lWall);
     lAngleSpace = (size.x - angleSegments * (lSpacing + lAngle) - 2 * rEdge) /  (angleSegments > 3 ? 4 : 2);
 
     base() children();
