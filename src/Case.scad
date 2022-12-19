@@ -72,11 +72,11 @@ module cover(
         function calcRampPolygonLowProfile() =
             let (
                 xTop = -radius * cos(aLowProfile) + cadFix,
-                xBottom = -hBoxPart + rEdge * (1 - sqrt0_5),
-                yLeftSouth = - radius - rEdge * (1 - sqrt0_5),
+                xBottom = -hBoxPart + rEdge * (1 - cos(aLowProfile)),
+                yLeftSouth = - radius - rEdge * (1 - sin(aLowProfile)),
                 yLeftNorth = - radius * sin(aLowProfile),
-                yRightSouth = radius * (sin(aLowProfile)),
-                yRightNorth = radius + rEdge * (1 - sqrt0_5)
+                yRightSouth = radius * sin(aLowProfile),
+                yRightNorth = radius + rEdge * (1 - sin(aLowProfile))
             )
                connectToSouth
                 ? [[xTop, yLeftSouth], [xTop, yRightSouth], [xBottom, yLeftSouth]]
