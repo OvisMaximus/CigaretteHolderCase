@@ -55,28 +55,51 @@ module cover(
         //  hlid minimal rEdge + dAngle/2
     }
 
-    module angleBase(pos, connectToSouth, hRampMax) {
-        radius = dAngle/2;
-        hRampOffset = (1 - 0.7071)*radius;
-        hRampMaxInternal = hRampMax + hRampOffset;
+    module angleBase(pos, connectToSouth, hRampMax, hBoxPart) {
+        function calcRampPolygon() =
+            let (
+                xTop = -radius * sqrt0_5 + cadFix,
+                xBottom = - radius * (1 + sqrt0_5),
+                yLeftSouth = - radius - cadFix,
+                yLeftNorth = - radius * sqrt0_5,
+                yRightSouth = radius * sqrt0_5,
+                yRightNorth = radius + cadFix
+            )
+                connectToSouth
+                ? [[xTop, yLeftSouth], [xTop, yRightSouth], [xBottom, yLeftSouth]]
+                : [[xTop, yLeftNorth], [xTop, yRightNorth ], [xBottom, yRightNorth]];
+
+        function calcRampPolygonLowProfile() =
+            let (
+                xTop = -radius * cos(aLowProfile) + cadFix,
+                xBottom = -hBoxPart + rEdge * (1 - sqrt0_5),
+                yLeftSouth = - radius - rEdge * (1 - sqrt0_5),
+                yLeftNorth = - radius * sin(aLowProfile),
+                yRightSouth = radius * (sin(aLowProfile)),
+                yRightNorth = radius + rEdge * (1 - sqrt0_5)
+            )
+               connectToSouth
+                ? [[xTop, yLeftSouth], [xTop, yRightSouth], [xBottom, yLeftSouth]]
+                : [[xTop, yLeftNorth], [xTop, yRightNorth ], [xBottom, yRightNorth]];
+
         module ramp() {
-            yMin45 = -radius * 1.7071;
-            yMin = hRampMaxInternal + yMin45 < 0? - hRampMaxInternal : yMin45;
-            rampPoints = connectToSouth
-                ? [[0, 0], [0, radius * 1.7071], [yMin, 0]]
-                : [[0, -(0.7071)*radius], [0, radius ], [yMin, radius]];
+            limitedSpace = hRampMax - radius * (1 + sqrt0_5) < 0;
+            rampPoints = limitedSpace? calcRampPolygonLowProfile() : calcRampPolygon();
             linear_extrude(lAngle)
                 polygon(rampPoints);
         }
+
         module angleBody() {
             cylinder(lAngle, d = dAngle);
-            translate([ -radius, connectToSouth? -radius : 0, 0]) {
+            translate([-radius, connectToSouth? -radius - cadFix: 0, 0])
                 cube([radius, radius + cadFix, lAngle]);
-                translate([hRampOffset, 0, 0])
-                    ramp();
-            }
-
+            ramp();
         }
+
+        radius = dAngle/2;
+        sqrt2 = sqrt(2);
+        sqrt0_5 = sqrt(0.5);
+        aLowProfile = 22.5;
         yPos = pos.y + (connectToSouth? dAngle : 0);
         translate([pos.x + lAngle / 2, yPos, pos.z])
             rotate([0, - 90, 0])
@@ -88,16 +111,16 @@ module cover(
                 }
     }
 
-    module angleNut(pos, atTop = true, connectToSouth = false, hRampMax = 0) {
+    module angleNut(pos, atTop = true, connectToSouth = false, hRampMax, hBoxPart) {
         zPosNut = atTop? lAngle + cadFix - lAngleNut : - cadFix;
-        angleBase(pos, connectToSouth, hRampMax)
+        angleBase(pos, connectToSouth, hRampMax, hBoxPart)
             translate([0, 0, zPosNut])
                 cylinder(lAngleNut + cadFix, d = dAngleNut, $fn = 6);
      }
 
-    module angleScrewHead(pos, atTop = true, connectToSouth = false, hRampMax = 0) {
+    module angleScrewHead(pos, atTop = true, connectToSouth = false, hRampMax, hBoxPart) {
         zPosNut = atTop? lAngle + cadFix - lAngleScrewHead : - cadFix;
-        angleBase(pos, connectToSouth, hRampMax)
+        angleBase(pos, connectToSouth, hRampMax, hBoxPart)
             translate([0, 0, zPosNut])
                 cylinder(lAngleScrewHead + cadFix, d = dAngleScrewHead);
     }
@@ -128,11 +151,11 @@ module cover(
 
     module lidAngles(hPos) {
         hRampMax = hPos - rEdge - dAngle / 2;
-        angleScrewHead([rEdge + lAngleSpace + lAngle / 2 , -dAngle/2, hPos], true, false, hRampMax);
+        angleScrewHead([rEdge + lAngleSpace + lAngle / 2 , -dAngle/2, hPos], true, false, hRampMax, hPos);
         if (angleSegments == 3 ) {
-            angleNut([rEdge + lAngleSpace + 2 * (lAngle + lSpacing) + lAngle / 2, -dAngle/2, hPos], false, hRampMax);
+            angleNut([rEdge + lAngleSpace + 2 * (lAngle + lSpacing) + lAngle / 2, -dAngle/2, hPos], false, hRampMax, hPos);
         } else if (angleSegments > 3) {
-            angleScrewHead([size.x - rEdge - lAngleSpace  - lAngle / 2, -dAngle/2, hPos], false, false, hRampMax);
+            angleScrewHead([size.x - rEdge - lAngleSpace  - lAngle / 2, -dAngle/2, hPos], false, false, hRampMax, hPos);
         }
     }
 
@@ -158,13 +181,13 @@ module cover(
         hRampMax = hPos - rEdge - dAngle / 2;
         lDistanceFromSide = rEdge + lAngleSpace + lAngle * 3/2 + lSpacing;
         if (angleSegments != 3) {
-            angleNut([lDistanceFromSide, - dAngle / 2, hPos], false, true, hRampMax);
+            angleNut([lDistanceFromSide, - dAngle / 2, hPos], false, true, hRampMax, hPos);
         }
         if (angleSegments == 3 ) {
-            angleBase([lDistanceFromSide, -dAngle/2, hPos], true, hRampMax);
+            angleBase([lDistanceFromSide, -dAngle/2, hPos], true, hRampMax, hPos);
         }
         if (angleSegments > 3) {
-            angleNut([size.x - lDistanceFromSide, -dAngle/2, hPos], true, true, hRampMax);
+            angleNut([size.x - lDistanceFromSide, -dAngle/2, hPos], true, true, hRampMax, hPos);
         }
     }
 
